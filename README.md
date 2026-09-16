@@ -1,6 +1,6 @@
-# 🎮 Môj podnikateľ
+# 🎮 Buď podnikateľ
 
-**Môj podnikateľ** je jednoduchá podnikateľská simulačná hra, v ktorej si vytvoríš vlastnú firmu a rozhoduješ o jej fungovaní.
+**buď podnikateľ** je jednoduchá podnikateľská simulačná hra, v ktorej si vytvoríš vlastnú firmu a rozhoduješ o jej fungovaní.
 
 ## 💰 Čo môžeš v hre robiť?
 
