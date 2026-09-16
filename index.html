@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="Môj podnikateľ – podnikateľská simulačná hra">
+    <meta name="theme-color" content="#2563eb">
+
+    <title>Môj podnikateľ</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="logo">💼 Môj podnikateľ</div>
+
+    <div class="top-stats">
+        <div>
+            <span>💰 Peniaze</span>
+            <strong id="money">0 €</strong>
+        </div>
+
+        <div>
+            <span>📅 Deň</span>
+            <strong id="day">1</strong>
+        </div>
+
+        <div>
+            <span>⭐ Level</span>
+            <strong id="level">1</strong>
+        </div>
+    </div>
+
+    <button id="logoutButton" class="danger-btn hidden" onclick="logoutUser()">
+        Odhlásiť
+    </button>
+</header>
+
+<main>
+
+<!-- START -->
+
+<section id="startScreen" class="screen active">
+    <div class="hero-card">
+        <div class="hero-icon">💼</div>
+
+        <h1>Môj podnikateľ</h1>
+
+        <p>
+            Vybuduj vlastnú firmu, rozhoduj o cenách,
+            marketingu, zamestnancoch a trhu.
+        </p>
+
+        <div class="warning-box">
+            ⚠️ Peniaze v tejto hre sú iba virtuálne.
+        </div>
+
+        <button class="primary-btn large" onclick="startGame()">
+            Začať hru
+        </button>
+    </div>
+</section>
+
+
+<!-- AUTH -->
+
+<section id="authScreen" class="screen">
+
+    <div class="auth-card">
+
+        <h1>🔐 Účet</h1>
+
+        <p>
+            Prihlás sa, aby sa tvoj progres ukladal.
+        </p>
+
+        <input
+            id="authEmail"
+            type="email"
+            placeholder="E-mail"
+        >
+
+        <input
+            id="authPassword"
+            type="password"
+            placeholder="Heslo"
+        >
+
+        <div class="button-row">
+
+            <button
+                class="primary-btn"
+                onclick="registerAccount()">
+                Vytvoriť účet
+            </button>
+
+            <button
+                class="secondary-btn"
+                onclick="loginAccount()">
+                Prihlásiť sa
+            </button>
+
+        </div>
+
+        <button
+            class="guest-btn"
+            onclick="playAsGuest()">
+            👤 Hrať bez prihlásenia
+        </button>
+
+        <div id="authMessage" class="message"></div>
+
+    </div>
+
+</section>
+
+
+<!-- CONTINUE -->
+
+<section id="continueScreen" class="screen">
+
+    <div class="continue-card">
+
+        <h1>💾 Uložený progres</h1>
+
+        <div id="saveInfo" class="save-info"></div>
+
+        <div class="button-row">
+
+            <button
+                class="primary-btn"
+                onclick="continueSavedGame()">
+                ▶️ Pokračovať
+            </button>
+
+            <button
+                class="secondary-btn"
+                onclick="startNewGame()">
+                🆕 Nová hra
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- MODE -->
+
+<section id="modeScreen" class="screen">
+
+    <div class="selection-card">
+
+        <h1>🎮 Vyber režim</h1>
+
+        <div class="mode-grid">
+
+            <button
+                class="choice-card"
+                onclick="chooseMode('career')">
+
+                <span>🎯</span>
+                <strong>Kariéra</strong>
+                <small>Buduj firmu dlhodobo.</small>
+
+            </button>
+
+            <button
+                class="choice-card"
+                onclick="chooseMode('quick')">
+
+                <span>⚡</span>
+                <strong>Rýchla hra</strong>
+                <small>Rýchla podnikateľská hra.</small>
+
+            </button>
+
+            <button
+                class="choice-card"
+                onclick="chooseMode('challenge')">
+
+                <span>🏆</span>
+                <strong>Výzva</strong>
+                <small>Splň špeciálne podmienky.</small>
+
+            </button>
+
+            <button
+                class="choice-card"
+                onclick="chooseMode('sandbox')">
+
+                <span>🧪</span>
+                <strong>Sandbox</strong>
+                <small>∞ € a voľné experimentovanie.</small>
+
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- INDUSTRY -->
+
+<section id="industryScreen" class="screen">
+
+    <div class="selection-card">
+
+        <h1>🏢 Vyber odvetvie</h1>
+
+        <div
+            id="industryContainer"
+            class="industry-grid">
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- DIFFICULTY -->
+
+<section id="difficultyScreen" class="screen">
+
+    <div class="selection-card">
+
+        <h1>⚙️ Obtiažnosť</h1>
+
+        <div class="difficulty-grid">
+
+            <button
+                class="choice-card"
+                onclick="chooseDifficulty('easy')">
+
+                <span>🟢</span>
+                <strong>Ľahká</strong>
+                <small>Jednoduchší začiatok.</small>
+
+            </button>
+
+            <button
+                class="choice-card"
+                onclick="chooseDifficulty('normal')">
+
+                <span>🔵</span>
+                <strong>Normálna</strong>
+                <small>Vyvážená hra.</small>
+
+            </button>
+
+            <button
+                class="choice-card"
+                onclick="chooseDifficulty('hard')">
+
+                <span>🟠</span>
+                <strong>Ťažká</strong>
+                <small>Menej zákazníkov a viac konkurencie.</small>
+
+            </button>
+
+            <button
+                class="choice-card"
+                onclick="chooseDifficulty('expert')">
+
+                <span>🔴</span>
+                <strong>Expert</strong>
+                <small>Veľká podnikateľská výzva.</small>
+
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- COMPANY -->
+
+<section id="companyScreen" class="screen">
+
+    <div class="company-card">
+
+        <h1>🏢 Tvoja firma</h1>
+
+        <p>
+            Zadaj názov svojej firmy.
+        </p>
+
+        <input
+            id="companyName"
+            type="text"
+            maxlength="40"
+            placeholder="Názov firmy"
+        >
+
+        <button
+            class="primary-btn large"
+            onclick="createCompany()">
+            🚀 Vytvoriť firmu
+        </button>
+
+        <div
+            id="companyMessage"
+            class="message">
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- GAME -->
+
+<section id="gameScreen" class="game-screen">
+
+    <div
+        id="guestWarning"
+        class="guest-warning hidden">
+
+        ⚠️ Hráš bez prihlásenia.
+        Progres sa po zatvorení stránky neuloží.
+
+    </div>
+
+    <div id="saveStatus" class="save-status"></div>
+
+    <div class="company-header">
+
+        <div>
+
+            <h1 id="companyTitle">
+                Moja firma
+            </h1>
+
+            <span id="dashboardIndustry">
+                Odvetvie
+            </span>
+
+        </div>
+
+        <button
+            class="primary-btn"
+            onclick="nextDay()">
+
+            🌅 Ďalší deň
+
+        </button>
+
+    </div>
+
+
+    <!-- NAV -->
+
+    <nav class="game-nav">
+
+        <button onclick="showPanel('overview')">
+            📊 Prehľad
+        </button>
+
+        <button onclick="showPanel('products')">
+            📦 Produkty
+        </button>
+
+        <button onclick="showPanel('market')">
+            📈 Trh
+        </button>
+
+        <button onclick="showPanel('marketing')">
+            📢 Marketing
+        </button>
+
+        <button onclick="showPanel('customers')">
+            👥 Zákazníci
+        </button>
+
+        <button onclick="showPanel('employees')">
+            👔 Zamestnanci
+        </button>
+
+        <button onclick="showPanel('statistics')">
+            📊 Štatistiky
+        </button>
+
+        <button onclick="showPanel('challenges')">
+            🏆 Výzvy
+        </button>
+
+        <button onclick="showPanel('achievements')">
+            🏅 Úspechy
+        </button>
+
+    </nav>
+
+
+    <!-- OVERVIEW -->
+
+    <section id="overview" class="game-panel active">
+
+        <h2>📊 Prehľad firmy</h2>
+
+        <div class="dashboard-grid">
+
+            <div class="stat-card">
+                <span>💰 Peniaze</span>
+                <strong id="dashboardMoney">0 €</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>💵 Tržby</span>
+                <strong id="dashboardRevenue">0 €</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>💸 Náklady</span>
+                <strong id="dashboardCosts">0 €</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>📈 Zisk</span>
+                <strong id="dashboardProfit">0 €</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>👥 Zákazníci</span>
+                <strong id="dashboardCustomers">0</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>😊 Spokojnosť</span>
+                <strong id="dashboardSatisfaction">50 %</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>⭐ XP</span>
+                <strong id="dashboardXP">0</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>⚙️ Obtiažnosť</span>
+                <strong id="dashboardDifficulty">
+                    Normálna
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <h3>📅 Dnešný výsledok</h3>
+
+            <div id="dailySummary"></div>
+
+        </div>
+
+
+        <div class="event-card">
+
+            <h3>🎲 Udalosť</h3>
+
+            <p id="eventText">
+                Dnes sa zatiaľ nič zvláštne nestalo.
+            </p>
+
+            <div id="eventChoices"></div>
+
+        </div>
+
+
+        <div class="market-news">
+
+            <h3>📰 Správy z trhu</h3>
+
+            <p id="marketNewsText">
+                Trh zatiaľ vyzerá stabilne.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- PRODUCTS -->
+
+    <section id="products" class="game-panel">
+
+        <div class="panel-heading">
+
+            <h2>📦 Produkty</h2>
+
+            <p id="productCountText"></p>
+
+        </div>
+
+        <div
+            id="productsContainer"
+            class="product-grid">
+        </div>
+
+    </section>
+
+
+    <!-- MARKET -->
+
+    <section id="market" class="game-panel">
+
+        <h2>📈 Trh</h2>
+
+        <div
+            id="marketContainer"
+            class="market-grid">
+        </div>
+
+    </section>
+
+
+    <!-- MARKETING -->
+
+    <section id="marketing" class="game-panel">
+
+        <h2>📢 Marketing</h2>
+
+        <div
+            id="marketingContainer"
+            class="marketing-grid">
+        </div>
+
+    </section>
+
+
+    <!-- CUSTOMERS -->
+
+    <section id="customers" class="game-panel">
+
+        <h2>👥 Zákazníci</h2>
+
+        <div class="customer-summary">
+
+            <div class="stat-card">
+                <span>Dnešní zákazníci</span>
+                <strong id="todayCustomers">0</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Dnešní nákupy</span>
+                <strong id="todayBuyers">0</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Spokojnosť</span>
+                <strong id="customerSatisfaction">
+                    50 %
+                </strong>
+            </div>
+
+        </div>
+
+        <div
+            id="customerTypesContainer"
+            class="customer-grid">
+        </div>
+
+    </section>
+
+
+    <!-- EMPLOYEES -->
+
+    <section id="employees" class="game-panel">
+
+        <h2>👔 Zamestnanci</h2>
+
+        <div class="employee-total">
+            Celkom zamestnancov:
+            <strong id="employeeTotal">0</strong>
+        </div>
+
+        <div
+            id="employeesContainer"
+            class="employee-grid">
+        </div>
+
+    </section>
+
+
+    <!-- STATISTICS -->
+
+    <section id="statistics" class="game-panel">
+
+        <h2>📊 Štatistiky</h2>
+
+        <div class="dashboard-grid">
+
+            <div class="stat-card">
+                <span>Tržby</span>
+                <strong id="statRevenue">0 €</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Náklady</span>
+                <strong id="statCosts">0 €</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Zisk</span>
+                <strong id="statProfit">0 €</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Predané kusy</span>
+                <strong id="statUnits">0</strong>
+            </div>
+
+        </div>
+
+        <div class="chart-card">
+            <h3>💰 Vývoj peňazí</h3>
+            <canvas id="moneyChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3>📈 Vývoj tržieb</h3>
+            <canvas id="revenueChart"></canvas>
+        </div>
+
+    </section>
+
+
+    <!-- CHALLENGES -->
+
+    <section id="challenges" class="game-panel">
+
+        <h2>🏆 Výzvy</h2>
+
+        <div class="challenge-grid">
+
+            <div class="challenge-card">
+
+                <h3>📅 Denná výzva</h3>
+
+                <div id="dailyChallenge"></div>
+
+            </div>
+
+            <div class="challenge-card">
+
+                <h3>🗓️ Týždenná výzva</h3>
+
+                <div id="weeklyChallenge"></div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ACHIEVEMENTS -->
+
+    <section id="achievements" class="game-panel">
+
+        <h2>🏅 Úspechy</h2>
+
+        <div
+            id="achievementsContainer"
+            class="achievement-grid">
+        </div>
+
+    </section>
+
+</section>
+
+</main>
+
+<script src="script.js"></script>
+
+</body>
+</html>
